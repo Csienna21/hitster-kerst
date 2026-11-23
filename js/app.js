@@ -1,10 +1,10 @@
 import { parseSpotifyTrack } from './spotify-link.js';
 import { login, logout, handleRedirect, isLoggedIn } from './auth.js';
-import { playTrack, pause, resume } from './player.js';
+// ?v=... zorgt dat Safari na een update de nieuwe versie laadt.
+import { playTrack, pause, resume } from './player.js?v=4';
 
 const $ = (id) => document.getElementById(id);
 const screens = ['login', 'home', 'scan', 'play', 'busy'];
-const RANDOM_KEY = 'hitster.randomStart';
 
 let currentTrackId = null;
 let playing = false;
@@ -29,7 +29,7 @@ function busy(text) {
 const MESSAGES = {
   'no-device': {
     title: 'Spotify slaapt nog',
-    text: 'Open de Spotify-app even op deze telefoon (je hoeft niets af te spelen). Kom daarna terug naar dit spel; het nummer start dan vanzelf.',
+    text: 'Tik op “Open Spotify” en wacht een paar tellen tot Spotify helemaal open is (je hoeft niets af te spelen). Ga daarna terug naar dit spel; het nummer start dan vanzelf.',
     actions: ['open-spotify', 'retry', 'home'],
   },
   premium: {
@@ -106,7 +106,7 @@ const MESSAGES = {
 
 const ACTIONS = {
   'open-spotify': { label: 'Open Spotify', cls: 'btn-primary', run: () => { location.href = 'spotify:'; } },
-  retry: { label: 'Opnieuw proberen', cls: 'btn-primary', run: () => startPlayback() },
+  retry: { label: 'Opnieuw proberen', cls: 'btn-primary', run: () => startPlayback({ attempts: 6 }) },
   scan: { label: 'Opnieuw scannen', cls: 'btn-primary', run: () => startScan() },
   relogin: { label: 'Inloggen met Spotify', cls: 'btn-primary', run: () => doLogin() },
   'do-logout': { label: 'Ja, uitloggen', cls: 'btn-primary', run: () => { logout(); show('login'); } },
@@ -148,8 +148,8 @@ function hideDialog() {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && autoRetryOnReturn && currentTrackId) {
     hideDialog();
-    busy('Nummer starten…');
-    setTimeout(startPlayback, 800);
+    // Spotify heeft na het openen even nodig; zoek tot ± 10 seconden.
+    startPlayback({ attempts: 10 });
   }
 });
 
@@ -216,11 +216,11 @@ async function onScan(text) {
 
 /* ---------- Afspelen ---------- */
 
-async function startPlayback() {
+async function startPlayback({ attempts = 3 } = {}) {
   if (!currentTrackId) return show('home');
-  busy('Nummer starten…');
+  busy(attempts > 3 ? 'Spotify zoeken…' : 'Nummer starten…');
   try {
-    await playTrack(currentTrackId, { randomStart: $('toggle-random').checked });
+    await playTrack(currentTrackId, { attempts });
     setPlaying(true);
     show('play');
   } catch (e) {
@@ -251,16 +251,7 @@ async function togglePlay() {
 
 /* ---------- Opstarten ---------- */
 
-function initToggle() {
-  const t = $('toggle-random');
-  try { t.checked = localStorage.getItem(RANDOM_KEY) === '1'; } catch { /* standaard uit */ }
-  t.addEventListener('change', () => {
-    try { localStorage.setItem(RANDOM_KEY, t.checked ? '1' : '0'); } catch { /* geen opslag */ }
-  });
-}
-
 async function init() {
-  initToggle();
   $('btn-login').addEventListener('click', doLogin);
   $('btn-scan').addEventListener('click', startScan);
   $('btn-logout')?.addEventListener('click', () => showError('confirm-logout'));

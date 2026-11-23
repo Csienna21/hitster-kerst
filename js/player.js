@@ -70,6 +70,9 @@ function toPlayerError(e) {
   return new PlayerError('unknown', String(e));
 }
 
+const DEVICE_KEY = 'hitster.deviceId';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 /** Kiest de Spotify-app op deze telefoon (of tablet). */
 async function findPhoneDevice() {
   const data = await api('GET', '/me/player/devices');
@@ -78,31 +81,57 @@ async function findPhoneDevice() {
   return mobile.find((d) => d.is_active) || mobile[0] || null;
 }
 
-let deviceId = null;
-
-/** Willekeurig startpunt: tussen 30 s en 60% van het nummer. */
-async function randomPosition(trackId) {
-  let duration = 0;
-  try {
-    duration = (await api('GET', `/tracks/${trackId}`))?.duration_ms || 0;
-  } catch { /* lengte onbekend: val terug op 30-60 s */ }
-  if (!duration) return 30_000 + Math.floor(Math.random() * 30_000);
-  const min = 30_000;
-  const max = Math.floor(duration * 0.6);
-  if (max <= min) return Math.floor(duration * 0.2);
-  return min + Math.floor(Math.random() * (max - min));
+/**
+ * Zoekt de telefoon een paar keer: na het openen van Spotify duurt het
+ * soms een paar seconden voordat de app zich bij Spotify meldt.
+ */
+async function waitForPhoneDevice(attempts) {
+  for (let i = 0; i < attempts; i++) {
+    const device = await findPhoneDevice();
+    if (device) return device;
+    if (i < attempts - 1) await sleep(1000);
+  }
+  return null;
 }
 
-export async function playTrack(trackId, { randomStart = false } = {}) {
-  const device = await findPhoneDevice();
-  if (!device) throw new PlayerError('no-device');
-  deviceId = device.id;
+function rememberedDevice() {
+  try { return localStorage.getItem(DEVICE_KEY); } catch { return null; }
+}
+function rememberDevice(id) {
+  try { localStorage.setItem(DEVICE_KEY, id); } catch { /* geen opslag */ }
+}
 
-  const position_ms = randomStart ? await randomPosition(trackId) : 0;
-  await api('PUT', `/me/player/play?device_id=${encodeURIComponent(deviceId)}`, {
+let deviceId = null;
+
+async function playOn(id, trackId) {
+  await api('PUT', `/me/player/play?device_id=${encodeURIComponent(id)}`, {
     uris: [`spotify:track:${trackId}`],
-    position_ms,
   });
+}
+
+/**
+ * @param {string} trackId
+ * @param {{attempts?: number}} opts  hoe vaak (± per seconde) naar de telefoon zoeken
+ */
+export async function playTrack(trackId, { attempts = 3 } = {}) {
+  const device = await waitForPhoneDevice(attempts);
+
+  if (device) {
+    deviceId = device.id;
+    await playOn(deviceId, trackId);
+  } else {
+    // Telefoon staat niet in de lijst. Probeer de telefoon van de vorige
+    // keer: Spotify accepteert die soms toch nog.
+    const last = rememberedDevice();
+    if (!last) throw new PlayerError('no-device');
+    try {
+      await playOn(last, trackId);
+    } catch (e) {
+      throw e.code === 'no-device' || e.code === 'unknown' ? new PlayerError('no-device') : e;
+    }
+    deviceId = last;
+  }
+  rememberDevice(deviceId);
 
   // Herhaal het nummer, zodat Spotify na afloop niet doorspeelt naar
   // een ander (misschien herkenbaar) nummer. Niet erg als dit mislukt.
