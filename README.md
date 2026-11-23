@@ -10,7 +10,7 @@ De eerste editie staat vol met Disney-liedjes. Je kunt meezingen, raden en voora
 Ik hoop dat we er nog heel vaak samen mee gaan spelen. 💙
 
 Liefs,
-chantal
+[jouw naam]
 
 ---
 
@@ -68,14 +68,13 @@ Wie als eerste **10 kaarten** goed in zijn tijdlijn heeft, wint! 🏆
 | Knop | Wat doet het? |
 |---|---|
 | **Grote ronde knop** | Pauzeren en weer verder spelen |
-| **Start op een willekeurig moment** | Het volgende nummer begint ergens in het midden. Zo verraadt het intro niets en wordt het lastiger. |
 | **Volgende kaart scannen** | Stopt het nummer en opent de camera voor de volgende kaart |
 
 ---
 
 ## 💡 Handige tips
 
-- **Open de Spotify-app even voordat je begint.** De iPhone zet Spotify na een tijdje in "slaapstand". Is dat zo, dan zegt het spel *"Spotify slaapt nog"*. Open Spotify dan even, ga terug naar het spel, en het nummer begint vanzelf.
+- **Open de Spotify-app even voordat je begint** en wacht een paar tellen tot hij helemaal open is. De iPhone zet Spotify na een tijdje in "slaapstand". Is dat zo, dan zegt het spel *"Spotify slaapt nog"*. Open Spotify dan even, wacht een paar tellen, ga terug naar het spel, en het nummer begint vanzelf. Daarna gaat het bij de volgende kaarten meteen goed.
 - **Leg de telefoon met het scherm naar beneden** terwijl het nummer speelt. Het vergrendelscherm en de bovenkant van het scherm laten namelijk de titel van het nummer zien.
 - **Open de Spotify-app niet tijdens een nummer.** Daar staat ook welk nummer er speelt.
 - Het **volume** regel je gewoon met de knoppen op de zijkant van je telefoon.
@@ -86,7 +85,7 @@ Wie als eerste **10 kaarten** goed in zijn tijdlijn heeft, wint! 🏆
 
 | Melding | Oplossing |
 |---|---|
-| **Spotify slaapt nog** | Tik op **Open Spotify**, ga daarna terug naar het spel. Het nummer start vanzelf. |
+| **Spotify slaapt nog** | Tik op **Open Spotify**, wacht een paar tellen en ga dan terug naar het spel. Het nummer start vanzelf. |
 | **Geen verbinding** | Controleer of de wifi of mobiele data aan staat, en tik op **Opnieuw proberen**. |
 | **Opnieuw inloggen** | Tik op **Inloggen met Spotify** en log in zoals de eerste keer. |
 | **Onbekende code** | De QR-code is niet goed gelezen. Probeer het opnieuw met wat meer licht en houd de telefoon stil. |
