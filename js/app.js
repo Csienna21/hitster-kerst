@@ -104,11 +104,14 @@ const ACTIONS = {
   home: { label: 'Terug', cls: 'btn-ghost', run: () => show('home') },
 };
 
+// Bij deze fouten tonen we klein wat er in de QR-code stond (handig om te controleren).
+const SCAN_ERRORS = { 'not-spotify': 1, 'not-track': 1, 'short-link': 1 };
+
 function showError(code, detail) {
   const m = MESSAGES[code] || MESSAGES.unknown;
   $('dialog-title').textContent = m.title;
   $('dialog-text').textContent = m.text;
-  $('dialog-detail').textContent = code === 'unknown' && detail ? String(detail) : '';
+  $('dialog-detail').textContent = detail && (code === 'unknown' || code in SCAN_ERRORS) ? String(detail) : '';
   const box = $('dialog-actions');
   box.replaceChildren();
   // Bij "Open Spotify" is "Opnieuw proberen" de tweede keus.
@@ -195,7 +198,7 @@ async function onScan(text) {
   const result = parseSpotifyTrack(text);
   if (!result.ok) {
     show('home');
-    showError(result.reason);
+    showError(result.reason, `Gescand: ${text.slice(0, 200)}`);
     return;
   }
   currentTrackId = result.id;

@@ -20,6 +20,25 @@ export function parseSpotifyTrack(raw) {
   const text = raw.trim();
   if (!text) return { ok: false, reason: 'empty' };
 
+  const direct = parseSingle(text);
+  if (direct.ok) return direct;
+
+  // De code bevat misschien tekst rondom de link, bv.
+  // "Luister naar ... op Spotify: https://open.spotify.com/track/...".
+  // Zoek dan losse links/URI's in de tekst.
+  const candidates = text.match(/(?:https?:\/\/|spotify:|open\.spotify\.com\/)[^\s"'<>]+/gi) || [];
+  const results = candidates.map((c) => parseSingle(c.replace(/[.,;:!?)\]]+$/, '')));
+  const found = results.find((r) => r.ok);
+  if (found) return found;
+
+  // Geef de meest behulpzame foutreden terug.
+  for (const reason of ['short-link', 'not-track']) {
+    if (direct.reason === reason || results.some((r) => r.reason === reason)) return { ok: false, reason };
+  }
+  return direct;
+}
+
+function parseSingle(text) {
   // spotify:track:<id>  (URI-vorm; soms met extra :-delen erachter)
   const uri = /^spotify:(\w+):([A-Za-z0-9]+)/i.exec(text);
   if (uri) {
