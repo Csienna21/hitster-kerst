@@ -1,9 +1,9 @@
 import { parseSpotifyTrack } from './spotify-link.js';
-import { login, handleRedirect, isLoggedIn, isConfigured } from './auth.js';
+import { login, logout, handleRedirect, isLoggedIn } from './auth.js';
 import { playTrack, pause, resume } from './player.js';
 
 const $ = (id) => document.getElementById(id);
-const screens = ['setup', 'login', 'home', 'scan', 'play', 'busy'];
+const screens = ['login', 'home', 'scan', 'play', 'busy'];
 const RANDOM_KEY = 'hitster.randomStart';
 
 let currentTrackId = null;
@@ -94,6 +94,11 @@ const MESSAGES = {
     text: 'Het inloggen bij Spotify is niet gelukt. Probeer het nog een keer.',
     actions: ['relogin'],
   },
+  'confirm-logout': {
+    title: 'Uitloggen?',
+    text: 'Daarna moet je opnieuw inloggen met Spotify om te kunnen spelen.',
+    actions: ['do-logout', 'home'],
+  },
 };
 
 const ACTIONS = {
@@ -101,7 +106,8 @@ const ACTIONS = {
   retry: { label: 'Opnieuw proberen', cls: 'btn-primary', run: () => startPlayback() },
   scan: { label: 'Opnieuw scannen', cls: 'btn-primary', run: () => startScan() },
   relogin: { label: 'Inloggen met Spotify', cls: 'btn-primary', run: () => doLogin() },
-  home: { label: 'Terug', cls: 'btn-ghost', run: () => show('home') },
+  'do-logout': { label: 'Ja, uitloggen', cls: 'btn-primary', run: () => { logout(); show('login'); } },
+  home: { label: 'Terug', cls: 'btn-ghost', run: () => show(isLoggedIn() ? 'home' : 'login') },
 };
 
 // Bij deze fouten tonen we klein wat er in de QR-code stond (handig om te controleren).
@@ -254,6 +260,7 @@ async function init() {
   initToggle();
   $('btn-login').addEventListener('click', doLogin);
   $('btn-scan').addEventListener('click', startScan);
+  $('btn-logout').addEventListener('click', () => showError('confirm-logout'));
   $('btn-cancel-scan').addEventListener('click', async () => { await stopScan(); show('home'); });
   $('btn-playpause').addEventListener('click', togglePlay);
   $('btn-next').addEventListener('click', () => {
@@ -261,8 +268,6 @@ async function init() {
     setPlaying(false);
     startScan();
   });
-
-  if (!isConfigured()) return show('setup');
 
   try {
     if (await handleRedirect()) { show('home'); return; }
