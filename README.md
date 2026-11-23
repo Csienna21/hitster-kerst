@@ -10,7 +10,7 @@ De eerste editie staat vol met Disney-liedjes. Je kunt meezingen, raden en voora
 Ik hoop dat we er nog heel vaak samen mee gaan spelen. 💙
 
 Liefs,
-[jouw naam]
+chantal
 
 ---
 
