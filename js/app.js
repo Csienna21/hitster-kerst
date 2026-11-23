@@ -13,7 +13,10 @@ let handlingScan = false;
 let autoRetryOnReturn = false;
 
 function show(name) {
-  for (const s of screens) $(`screen-${s}`).hidden = s !== name;
+  for (const s of screens) {
+    const el = $(`screen-${s}`);
+    if (el) el.hidden = s !== name;
+  }
 }
 
 function busy(text) {
@@ -260,7 +263,7 @@ async function init() {
   initToggle();
   $('btn-login').addEventListener('click', doLogin);
   $('btn-scan').addEventListener('click', startScan);
-  $('btn-logout').addEventListener('click', () => showError('confirm-logout'));
+  $('btn-logout')?.addEventListener('click', () => showError('confirm-logout'));
   $('btn-cancel-scan').addEventListener('click', async () => { await stopScan(); show('home'); });
   $('btn-playpause').addEventListener('click', togglePlay);
   $('btn-next').addEventListener('click', () => {
